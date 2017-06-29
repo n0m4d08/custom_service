@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# ntp_exporter
+#
+# chkconfig: 345 70 30
+# description: NTP exporter
+# processname: ntp_exporter
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+RETVAL=0
+prog="ntp_exporter"
+LOCKFILE=/var/lock/subsys/$prog
+
+# Declare variables for NTP Client
+NTP_DIR=/opt
+ASADMIN=$NTP_DIR/ntp_exporter
+
+start() {
+        echo -n "Starting $prog: "
+        daemon $ASADMIN -ntp.server 10.1.28.108 -web.listen-address 0.0.0.0:9200 &
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch $LOCKFILE
+	echo
+        return $RETVAL
+}
+
+stop() {
+	[ "$EUID" != "0" ] && exit 4
+        echo -n "Shutting down $prog: "
+	 killproc $prog
+        RETVAL=$?
+	echo
+        [ $RETVAL -eq 0 ] && rm -f $LOCKFILE
+        return $RETVAL
+}
+
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    reload)
+        exit 3
+        ;;
+    *)
+        echo "Usage: $prog {start|stop|status|restart|reload}"
+        exit 1
+        ;;
+esac
+exit $RETVAL
