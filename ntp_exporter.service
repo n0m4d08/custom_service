@@ -1,0 +1,14 @@
+[Unit]
+Description=NTP exporter service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/mrviii/go/bin
+ExecStart=/home/mrviii/go/bin/ntp_exporter -ntp.server 10.1.28.108 -web.listen-address 0.0.0.0:9200
+ExecReload=/bin/kill -USR1 $MAINPID
+ExecStop=/bin/kill -WINCH $MAINPID
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
